@@ -1382,6 +1382,40 @@ gCryTable:: @ 848C914
 	cry Cry_Jirachi @ 848DB20
 	cry Cry_Deoxys @ 848DB2C
 	cry Cry_Chimecho @ 848DB38
+	cry Cry_Budew @ 84A3200
+	cry Cry_Roserade @ 84A320C
+	cry Cry_Ambipom @ 84A3228
+	cry Cry_Mismagius @  84A3234
+	cry Cry_Honchkrow @ 84A3240
+	cry Cry_Chingling @ 84A324C
+	cry Cry_Bonsly @ 84A3258
+	cry Cry_MimeJr @ 84A3264
+	cry Cry_Happiny @ 84A3270
+	cry Cry_Munchlax @ 84A327C
+	cry Cry_Mantyke @ 84A3288
+	cry Cry_Weavile @ 84A3294
+	cry Cry_Magnezone @ 84A32A0
+	cry Cry_Lickilicky @ 84A32AC
+	cry Cry_Rhyperior @ 84A32B8
+	cry Cry_Tangrowth @ 84A32C4
+	cry Cry_Electivire @ 84A32D0
+	cry Cry_Magmortar @ 84A32DC
+	cry Cry_Togekiss @ 84A32E8
+	cry Cry_Yanmega @ 84A32F4
+	cry Cry_Leafeon @ 84A3300
+	cry Cry_Glaceon @ 84A330C
+	cry Cry_Gliscor @ 84A3318
+	cry Cry_Mamoswine @ 84A3324
+	cry Cry_PorygonZ @ 84A3330
+	cry Cry_Gallade @ 84A333C
+	cry Cry_Probopass @ 84A3348
+	cry Cry_Dusknoir @ 84A3354
+	cry Cry_Froslass @ 84A3360
+	cry Cry_Sylveon @ 84A336C
+	cry Cry_Obstagoon @ 84A3378
+	cry Cry_Sirfetchd @ 84A3384
+
+
 
 gCryTable2:: @ 848DB44
 	cry2 Cry_Bulbasaur @ 848DB44
@@ -1772,6 +1806,38 @@ gCryTable2:: @ 848DB44
 	cry2 Cry_Jirachi @ 848ED50
 	cry2 Cry_Deoxys @ 848ED5C
 	cry2 Cry_Chimecho @ 848ED68
+	cry2 Cry_Budew @ 84A33A8
+	cry2 Cry_Roserade @ 84A33B4
+	cry2 Cry_Ambipom @ 84A33C0
+	cry2 Cry_Mismagius @ 84A33CC
+	cry2 Cry_Honchkrow @ 84A33D8
+	cry2 Cry_Chingling @ 84A33E4
+	cry2 Cry_Bonsly @ 84A33E0
+	cry2 Cry_MimeJr @ 84A33EC
+	cry2 Cry_Happiny @ 84A33F8
+	cry2 Cry_Munchlax @ 84A3404
+	cry2 Cry_Mantyke @ 84A3410
+	cry2 Cry_Weavile @ 84A341C
+	cry2 Cry_Magnezone @ 84A3428
+	cry2 Cry_Lickilicky @ 84A3434
+	cry2 Cry_Rhyperior @ 84A3440
+	cry2 Cry_Tangrowth @ 84A344C
+	cry2 Cry_Electivire @ 84A3458
+	cry2 Cry_Magmortar @ 84A3464
+	cry2 Cry_Togekiss @ 84A3470
+	cry2 Cry_Yanmega @ 84A347C
+	cry2 Cry_Leafeon @ 84A3488
+	cry2 Cry_Glaceon @ 84A3494
+	cry2 Cry_Gliscor @ 84A34A0
+	cry2 Cry_Mamoswine @ 84A34AC
+	cry2 Cry_PorygonZ @ 84A34B8
+	cry2 Cry_Gallade @ 84A34C4
+	cry2 Cry_Probopass @ 84A34D0
+	cry2 Cry_Dusknoir @ 84A34DC
+	cry2 Cry_Froslass @ 84A34E8
+	cry2 Cry_Sylveon @ 84A34F4
+	cry2 Cry_Obstagoon @ 84A3500
+	cry2 Cry_Sirfetchd @ 84A350C
 
 	.align 2
 voicegroup129:: @ 848ED74

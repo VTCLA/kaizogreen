@@ -229,6 +229,13 @@ extern const u8 BattleScript_GhostBallDodge[];
 extern const u8 BattleScript_OldMan_Pokedude_CaughtMessage[];
 extern const u8 BattleScript_SilphScopeUnveiled[];
 extern const u8 BattleScript_BattleTowerTrainerBattleWon[];
+extern const u8 BattleScript_DrySkinActivatesInSun[];
+extern const u8 BattleScript_EffectSpeedUp[];
+extern const u8 BattleScript_DefenderSpeedUp[];
+extern const u8 BattleScript_DefenderAttackUp[];
+extern const u8 BattleScript_DefenderSpecialAttackUp[];
+extern const u8 BattleScript_CursedBodyActivates[];
+extern const u8 BattleScript_GooeyActivates[];
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 extern const u8 *const gBattlescriptsForBallThrow[];

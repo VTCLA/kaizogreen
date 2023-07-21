@@ -488,6 +488,10 @@ BattleScript_EffectSpecialAttackUp::
 	setstatchanger STAT_SPATK, 1, FALSE
 	goto BattleScript_EffectStatUp
 
+BattleScript_EffectSpeedUp::
+	setstatchanger STAT_SPEED, 1, FALSE
+	goto BattleScript_EffectStatUp
+
 BattleScript_EffectEvasionUp::
 	setstatchanger STAT_EVASION, 1, FALSE
 BattleScript_EffectStatUp::
@@ -3917,6 +3921,7 @@ BattleScript_MoveEffectConfusion::
 BattleScript_MoveEffectRecoil::
 	jumpifmove MOVE_STRUGGLE, BattleScript_DoRecoil
 	jumpifability BS_ATTACKER, ABILITY_ROCK_HEAD, BattleScript_RecoilEnd
+	jumpifability BS_ATTACKER, ABILITY_MAGIC_GUARD, BattleScript_RecoilEnd
 BattleScript_DoRecoil::
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_DAMAGE
 	healthbarupdate BS_ATTACKER
@@ -3931,6 +3936,18 @@ BattleScript_ItemSteal::
 	playanimation BS_TARGET, B_ANIM_ITEM_STEAL, NULL
 	printstring STRINGID_PKMNSTOLEITEM
 	waitmessage 0x40
+	return
+	
+BattleScript_CursedBodyActivates::
+	printstring STRINGID_CUSEDBODYDISABLED
+	waitmessage B_WAIT_TIME_LONG
+	return
+
+BattleScript_GooeyActivates::
+	waitstate
+	printstring STRINGID_PKMNSXACTIVATED
+	waitmessage 0x40
+	seteffectsecondary
 	return
 
 BattleScript_DrizzleActivates::
@@ -3947,6 +3964,39 @@ BattleScript_SpeedBoostActivates::
 	waitmessage 0x40
 	end3
 
+BattleScript_DefenderSpeedUp::
+	attackstring
+	pause 0x20
+	printstring STRINGID_PKMNSXMADEYUSELESS
+	waitmessage 0x40
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_PKMNSSPEEDUP
+	waitmessage 0x40
+	orbyte gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	goto BattleScript_MoveEnd
+
+BattleScript_DefenderAttackUp::
+	attackstring
+	pause 0x20
+	printstring STRINGID_PKMNSXMADEYUSELESS
+	waitmessage 0x40
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_PKMNSATTACKUP
+	waitmessage 0x40
+	orbyte gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	goto BattleScript_MoveEnd
+
+BattleScript_DefenderSpecialAttackUp::
+	attackstring
+	pause 0x20
+	printstring STRINGID_PKMNSXMADEYUSELESS
+	waitmessage 0x40
+	playanimation BS_TARGET, B_ANIM_STATS_CHANGE, sB_ANIM_ARG1
+	printstring STRINGID_PKMNSSPECIALATTACKUP
+	waitmessage 0x40
+	orbyte gMoveResultFlags, MOVE_RESULT_DOESNT_AFFECT_FOE
+	goto BattleScript_MoveEnd
+
 BattleScript_TraceActivates::
 	pause 0x20
 	printstring STRINGID_PKMNTRACED
@@ -3955,6 +4005,14 @@ BattleScript_TraceActivates::
 
 BattleScript_RainDishActivates::
 	printstring STRINGID_PKMNSXRESTOREDHPALITTLE2
+	waitmessage 0x40
+	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
+	healthbarupdate BS_ATTACKER
+	datahpupdate BS_ATTACKER
+	end3
+
+BattleScript_DrySkinActivatesInSun::
+	printstring STRINGID_PKMNHURTSWITH
 	waitmessage 0x40
 	orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE
 	healthbarupdate BS_ATTACKER

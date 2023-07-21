@@ -39,6 +39,18 @@
 #define SPECIES_TO_NATIONAL(name)   [SPECIES_##name - 1] = NATIONAL_DEX_##name
 #define HOENN_TO_NATIONAL(name)     [HOENN_DEX_##name - 1] = NATIONAL_DEX_##name
 
+static const u16 sPunchMovesTable[] = 
+{
+    MOVE_COMET_PUNCH, MOVE_DIZZY_PUNCH, MOVE_DYNAMIC_PUNCH, MOVE_FIRE_PUNCH,
+    MOVE_FOCUS_PUNCH, MOVE_ICE_PUNCH, MOVE_THUNDER_PUNCH, MOVE_MACH_PUNCH,
+    MOVE_MEGA_PUNCH, MOVE_SKY_UPPERCUT, MOVE_SHADOW_PUNCH, 0xFFFF
+};
+
+static const u16 sBiteMovesTable[] = 
+{
+    MOVE_BITE, MOVE_CRUNCH, MOVE_HYPER_FANG, MOVE_POISON_FANG, 0xFFFF
+};
+
 struct OakSpeechNidoranFStruct
 {
     u8 spriteCount:4;
@@ -922,6 +934,36 @@ static const u16 sSpeciesToNationalPokedexNum[] = // Assigns all species to the 
     SPECIES_TO_NATIONAL(JIRACHI),
     SPECIES_TO_NATIONAL(DEOXYS),
     SPECIES_TO_NATIONAL(CHIMECHO),
+    SPECIES_TO_NATIONAL(BUDEW),
+    SPECIES_TO_NATIONAL(ROSERADE),
+    SPECIES_TO_NATIONAL(AMBIPOM),
+    SPECIES_TO_NATIONAL(CHINGLING),
+    SPECIES_TO_NATIONAL(BONSLY),
+    SPECIES_TO_NATIONAL(MIME_JR),
+    SPECIES_TO_NATIONAL(HAPPINY),
+    SPECIES_TO_NATIONAL(MUNCHLAX),
+    SPECIES_TO_NATIONAL(MANTYKE),
+    SPECIES_TO_NATIONAL(WEAVILE),
+    SPECIES_TO_NATIONAL(MAGNEZONE),
+    SPECIES_TO_NATIONAL(LICKILICKY),
+    SPECIES_TO_NATIONAL(RHYPERIOR),
+    SPECIES_TO_NATIONAL(TANGROWTH),
+    SPECIES_TO_NATIONAL(ELECTIVIRE),
+    SPECIES_TO_NATIONAL(MAGMORTAR),
+    SPECIES_TO_NATIONAL(TOGEKISS),
+    SPECIES_TO_NATIONAL(YANMEGA),
+    SPECIES_TO_NATIONAL(LEAFEON),
+    SPECIES_TO_NATIONAL(GLACEON),
+    SPECIES_TO_NATIONAL(GLISCOR),
+    SPECIES_TO_NATIONAL(MAMOSWINE),
+    SPECIES_TO_NATIONAL(PORYGON_Z),
+    SPECIES_TO_NATIONAL(GALLADE),
+    SPECIES_TO_NATIONAL(PROBOPASS),
+    SPECIES_TO_NATIONAL(DUSKNOIR),
+    SPECIES_TO_NATIONAL(FROSLASS),
+    SPECIES_TO_NATIONAL(SYLVEON),
+    SPECIES_TO_NATIONAL(OBSTAGOON),
+    SPECIES_TO_NATIONAL(SIRFETCHD),
 };
 
 static const u16 sHoennToNationalOrder[] = // Assigns Hoenn Dex Pokémon (Using National Dex Index)
@@ -2383,6 +2425,10 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     spAttack = attacker->spAttack;
     spDefense = defender->spDefense;
 
+    //technician goes first so that it works properly
+    if (attacker->ability == ABILITY_TECHNICIAN && gBattleMoves[move].power <= 60)
+        gBattleMovePower = (15 * gBattleMovePower) / 10;
+
     if (attacker->item == ITEM_ENIGMA_BERRY)
     {
         attackerHoldEffect = gEnigmaBerries[battlerIdAtk].holdEffect;
@@ -2409,40 +2455,40 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         attack *= 2;
 
     // In FRLG, the Battle Tower and opponent checks are stubbed here.
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |*/ BATTLE_TYPE_EREADER_TRAINER)))
+    /*
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |* / BATTLE_TYPE_EREADER_TRAINER)))
     {
         if (FlagGet(FLAG_BADGE01_GET)
             && GetBattlerSide(battlerIdAtk) == B_SIDE_PLAYER)
             attack = (110 * attack) / 100;
     }
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |*/ BATTLE_TYPE_EREADER_TRAINER)))
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |* / BATTLE_TYPE_EREADER_TRAINER)))
     {
         if (FlagGet(FLAG_BADGE05_GET)
             && GetBattlerSide(battlerIdDef) == B_SIDE_PLAYER)
             defense = (110 * defense) / 100;
     }
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |*/ BATTLE_TYPE_EREADER_TRAINER)))
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |* / BATTLE_TYPE_EREADER_TRAINER)))
     {
         if (FlagGet(FLAG_BADGE07_GET)
             && GetBattlerSide(battlerIdAtk) == B_SIDE_PLAYER)
             spAttack = (110 * spAttack) / 100;
     }
-    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |*/ BATTLE_TYPE_EREADER_TRAINER)))
+    if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | /*BATTLE_TYPE_BATTLE_TOWER |* / BATTLE_TYPE_EREADER_TRAINER)))
     {
         if (FlagGet(FLAG_BADGE07_GET)
             && GetBattlerSide(battlerIdDef) == B_SIDE_PLAYER)
             spDefense = (110 * spDefense) / 100;
     }
+    */
 
     for (i = 0; i < NELEMS(sHoldEffectToType); i++)
     {
         if (attackerHoldEffect == sHoldEffectToType[i][0]
             && type == sHoldEffectToType[i][1])
         {
-            if (IS_TYPE_PHYSICAL(type))
-                attack = (attack * (attackerHoldEffectParam + 100)) / 100;
-            else
-                spAttack = (spAttack * (attackerHoldEffectParam + 100)) / 100;
+            attack = (attack * (attackerHoldEffectParam + 100)) / 100;
+            spAttack = (spAttack * (attackerHoldEffectParam + 100)) / 100;
             break;
         }
     }
@@ -2464,7 +2510,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     if (attackerHoldEffect == HOLD_EFFECT_THICK_CLUB && (attacker->species == SPECIES_CUBONE || attacker->species == SPECIES_MAROWAK))
         attack *= 2;
     if (defender->ability == ABILITY_THICK_FAT && (type == TYPE_FIRE || type == TYPE_ICE))
-        spAttack /= 2;
+        gBattleMovePower /= 2;
     if (attacker->ability == ABILITY_HUSTLE)
         attack = (150 * attack) / 100;
     if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS))
@@ -2489,8 +2535,80 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         gBattleMovePower = (150 * gBattleMovePower) / 100;
     if (gBattleMoves[gCurrentMove].effect == EFFECT_EXPLOSION)
         defense /= 2;
+    if (defender->ability == ABILITY_DRY_SKIN && type == TYPE_FIRE)
+        gBattleMovePower = (5 * gBattleMovePower) / 4;
+    if (defender->ability == ABILITY_FUR_COAT)
+        defense *= 2;
+    if (attacker->ability == ABILITY_FLARE_BOOST && (attacker->status1 & STATUS1_BURN))
+        spAttack = (15 * spAttack) / 10
+    if (attacker->ability == ABILITY_SHEER_FORCE && gBattleMoves[move].secondaryEffectChance != 0
+     && gBattleMoves[move].secondaryEffectChance != 100)
+        gBattleMovePower = (13 * gBattleMovePower) / 10;
+    if (attacker->ability == ABILITY_RECKLESS && (gBattleMoves[move].effect == EFFECT_RECOIL
+     || gBattleMoves[move].effect == EFFECT_RECOIL_IF_MISS || gBattleMoves[move].effect == EFFECT_DOUBLE_EDGE))
+        gBattleMovePower = (12 * gBattleMovePower) / 10;
+    if (defender->ability == ABILITY_MULTISCALE && defender->hp == defender->maxHP)
+        gBattleMovePower /= 2;
+    if (attacker->ability == ABILITY_IRON_FIST)
+    {
+        for (i = 0; sPunchMovesTable[i] != 0xFFFF; ++i)
+            if (sPunchMovesTable[i] == move)
+                attack = (12 * attack) / 10;
+    }
+    if (attacker->ability == ABILITY_STRONG_JAW)
+    {
+        for (i = 0; sBiteMovesTable[i] != 0xFFFF; ++i)
+            if (sBiteMovesTable[i] == move)
+                attack = (15 * attack) / 10;
+    }
 
-    if (IS_TYPE_PHYSICAL(type))
+    // are effects of weather negated with cloud nine or air lock
+    if (WEATHER_HAS_EFFECT2)
+    {
+        if (gBattleWeather & WEATHER_RAIN_ANY)
+        {
+            switch (type)
+            {
+            case TYPE_FIRE:
+                gBattleMovePower /= 2;
+                break;
+            case TYPE_WATER:
+                gBattleMovePower = (15 * gBattleMovePower) / 10;
+                break;
+            }
+        }
+
+        // any weather except sun weakens solar beam
+        if ((gBattleWeather & (WEATHER_RAIN_ANY | WEATHER_SANDSTORM_ANY | WEATHER_HAIL)) && gCurrentMove == MOVE_SOLAR_BEAM)
+            gBattleMovePower /= 2;
+
+        // sunny
+        if (gBattleWeather & WEATHER_SUN_ANY)
+        {
+            switch (type)
+            {
+            case TYPE_FIRE:
+                gBattleMovePower = (15 * gBattleMovePower) / 10;
+                break;
+            case TYPE_WATER:
+                gBattleMovePower /= 2;
+                break;
+            }
+
+            if (attacker->ability == ABILITY_SOLAR_POWER)
+                spAttack = (15 * spAttack) / 10;
+        }
+
+        if (gBattleWeather & WEATHER_SANDSTORM_ANY && attacker->ability == ABILITY_SAND_FORCE
+         && (type == TYPE_ROCK || type == TYPE_GROUND || type == TYPE_STEEL))
+           gBattleMovePower = (13 * gBattleMovePower) / 10;
+    }
+
+    // flash fire triggered
+    if ((gBattleResources->flags->flags[battlerIdAtk] & RESOURCE_FLAG_FLASH_FIRE) && type == TYPE_FIRE)
+        damage = (15 * damage) / 10;
+
+    if (IS_MOVE_PHYSICAL(gCurrentMove))
     {
         if (gCritMultiplier == 2)
         {
@@ -2540,7 +2658,7 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
     if (type == TYPE_MYSTERY)
         damage = 0; // is ??? type. does 0 damage.
 
-    if (IS_TYPE_SPECIAL(type))
+    if (IS_MOVE_SPECIAL(gCurrentMove))
     {
         if (gCritMultiplier == 2)
         {
@@ -2578,45 +2696,6 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
 
         if ((gBattleTypeFlags & BATTLE_TYPE_DOUBLE) && gBattleMoves[move].target == 8 && CountAliveMonsInBattle(BATTLE_ALIVE_DEF_SIDE) == 2)
             damage /= 2;
-
-        // are effects of weather negated with cloud nine or air lock
-        if (WEATHER_HAS_EFFECT2)
-        {
-            if (gBattleWeather & WEATHER_RAIN_TEMPORARY)
-            {
-                switch (type)
-                {
-                case TYPE_FIRE:
-                    damage /= 2;
-                    break;
-                case TYPE_WATER:
-                    damage = (15 * damage) / 10;
-                    break;
-                }
-            }
-
-            // any weather except sun weakens solar beam
-            if ((gBattleWeather & (WEATHER_RAIN_ANY | WEATHER_SANDSTORM_ANY | WEATHER_HAIL)) && gCurrentMove == MOVE_SOLAR_BEAM)
-                damage /= 2;
-
-            // sunny
-            if (gBattleWeather & WEATHER_SUN_ANY)
-            {
-                switch (type)
-                {
-                case TYPE_FIRE:
-                    damage = (15 * damage) / 10;
-                    break;
-                case TYPE_WATER:
-                    damage /= 2;
-                    break;
-                }
-            }
-        }
-
-        // flash fire triggered
-        if ((gBattleResources->flags->flags[battlerIdAtk] & RESOURCE_FLAG_FLASH_FIRE) && type == TYPE_FIRE)
-            damage = (15 * damage) / 10;
     }
 
     return damage + 2;
@@ -4935,7 +5014,7 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 type, u16 evolutionItem)
         level = GetMonData(mon, MON_DATA_LEVEL, NULL);
         friendship = GetMonData(mon, MON_DATA_FRIENDSHIP, NULL);
 
-        for (i = 0; i < 5; i++)
+        for (i = 0; i < 8; i++)
         {
             switch (gEvolutionTable[species][i].method)
             {

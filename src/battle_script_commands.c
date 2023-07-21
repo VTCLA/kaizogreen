@@ -930,7 +930,7 @@ static void atk00_attackcanceler(void)
     if (gSpecialStatuses[gBattlerTarget].lightningRodRedirected)
     {
         gSpecialStatuses[gBattlerTarget].lightningRodRedirected = FALSE;
-        gLastUsedAbility = ABILITY_LIGHTNING_ROD;
+        gLastUsedAbility = gBattleMons[gBattlerTarget].ability;
         BattleScriptPushCursor();
         gBattlescriptCurrInstr = BattleScript_TookAttack;
         RecordAbilityBattle(gBattlerTarget, gLastUsedAbility);
@@ -1002,6 +1002,11 @@ static bool8 JumpIfMoveAffectedByProtect(u16 move)
 static bool8 AccuracyCalcHelper(u16 move)
 {
     if (gStatuses3[gBattlerTarget] & STATUS3_ALWAYS_HITS && gDisableStructs[gBattlerTarget].battlerWithSureHit == gBattlerAttacker)
+    {
+        JumpIfMoveFailed(7, move);
+        return TRUE;
+    }
+    if (gBattleMons[gBattlerAttacker].ability == ABILITY_NO_GUARD || gBattleMons[gBattlerTarget].ability == ABILITY_NO_GUARD)
     {
         JumpIfMoveFailed(7, move);
         return TRUE;
@@ -1099,7 +1104,7 @@ static void atk01_accuracycheck(void)
             calc = (calc * 130) / 100; // 1.3 compound eyes boost
         if (WEATHER_HAS_EFFECT && gBattleMons[gBattlerTarget].ability == ABILITY_SAND_VEIL && gBattleWeather & WEATHER_SANDSTORM_ANY)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
-        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_TYPE_PHYSICAL(type))
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_MOVE_PHYSICAL(move))
             calc = (calc * 80) / 100; // 1.2 hustle loss
         if (gBattleMons[gBattlerTarget].item == ITEM_ENIGMA_BERRY)
         {
@@ -1206,6 +1211,7 @@ static void atk04_critcalc(void)
                 + (gBattleMoves[gCurrentMove].effect == EFFECT_BLAZE_KICK)
                 + (gBattleMoves[gCurrentMove].effect == EFFECT_POISON_TAIL)
                 + (holdEffect == HOLD_EFFECT_SCOPE_LENS)
+                + (gBattleMons[gBattlerAttacker].ability == ABILITY_SUPER_LUCK)
                 + 2 * (holdEffect == HOLD_EFFECT_LUCKY_PUNCH && gBattleMons[gBattlerAttacker].species == SPECIES_CHANSEY)
                 + 2 * (holdEffect == HOLD_EFFECT_STICK && gBattleMons[gBattlerAttacker].species == SPECIES_FARFETCHD);
     if (critChance >= NELEMS(sCriticalHitChance))
@@ -1306,11 +1312,28 @@ static void atk06_typecalc(void)
         return;
     }
     GET_MOVE_TYPE(gCurrentMove, moveType);
+    if (moveType == TYPE_NORMAL && gBattleMons[gBattlerAttacker].ability == ABILITY_PIXILATE)
+    {
+        moveType = TYPE_FAIRY;
+        gBattleMoveDamage = gBattleMoveDamage * 12;
+        gBattleMoveDamage = gBattleMoveDamage / 10;
+    }
+    if (gBattleMons[gBattlerAttacker].ability == ABILITY_NORMALIZE)
+    {
+        moveType = TYPE_NORMAL;
+        gBattleMoveDamage = gBattleMoveDamage * 12;
+        gBattleMoveDamage = gBattleMoveDamage / 10;
+    }
     // check stab
     if (IS_BATTLER_OF_TYPE(gBattlerAttacker, moveType))
     {
-        gBattleMoveDamage = gBattleMoveDamage * 15;
-        gBattleMoveDamage = gBattleMoveDamage / 10;
+        if (gBattleMons[gBattlerAttacker].ability == ABILITY_ADAPTABILITY)
+            gBattleMoveDamage = gBattleMoveDamage * 2;
+        else
+        {
+            gBattleMoveDamage = gBattleMoveDamage * 15;
+            gBattleMoveDamage = gBattleMoveDamage / 10;
+        }
     }
 
     if (gBattleMons[gBattlerTarget].ability == ABILITY_LEVITATE && moveType == TYPE_GROUND)
@@ -1336,15 +1359,30 @@ static void atk06_typecalc(void)
             else if (TYPE_EFFECT_ATK_TYPE(i) == moveType)
             {
                 // check type1
-                if (TYPE_EFFECT_DEF_TYPE(i) == gBattleMons[gBattlerTarget].type1)
+                if (TYPE_EFFECT_DEF_TYPE(i) == gBattleMons[gBattlerTarget].type1 &&
+                 !(gBattleMons[gBattlerAttacker].ability == ABILITY_SCRAPPY
+                 && (moveType == TYPE_NORMAL || moveType == TYPE_FIGHTING)
+                 && gBattleMons[gBattlerTarget].type1 == TYPE_GHOST))
                     ModulateDmgByType(TYPE_EFFECT_MULTIPLIER(i));
                 // check type2
                 if (TYPE_EFFECT_DEF_TYPE(i) == gBattleMons[gBattlerTarget].type2 &&
-                    gBattleMons[gBattlerTarget].type1 != gBattleMons[gBattlerTarget].type2)
+                 gBattleMons[gBattlerTarget].type1 != gBattleMons[gBattlerTarget].type2 &&
+                 !(gBattleMons[gBattlerAttacker].ability == ABILITY_SCRAPPY
+                 && (moveType == TYPE_NORMAL || moveType == TYPE_FIGHTING)
+                 && gBattleMons[gBattlerTarget].type2 == TYPE_GHOST))
                     ModulateDmgByType(TYPE_EFFECT_MULTIPLIER(i));
             }
             i += 3;
         }
+    }
+    //tinted Lens and filter/solid rock check
+    if ((gMoveResultFlags & MOVE_RESULT_NOT_VERY_EFFECTIVE) && gBattleMons[gBattlerAttacker].ability == ABILITY_TINTED_LENS)
+        gBattleMoveDamage = gBattleMoveDamage * 2;
+    if ((gBattleMons[gBattlerTarget].ability == ABILITY_FILTER || gBattleMons[gBattlerTarget].ability == ABILITY_SOLID_ROCK)
+     && (gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE))
+    {
+        gBattleMoveDamage = gBattleMoveDamage * 3;
+        gBattleMoveDamage = gBattleMoveDamage / 4;
     }
     if (gBattleMons[gBattlerTarget].ability == ABILITY_WONDER_GUARD && AttacksThisTurn(gBattlerAttacker, gCurrentMove) == 2
      && (!(gMoveResultFlags & MOVE_RESULT_SUPER_EFFECTIVE) || ((gMoveResultFlags & (MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE)) == (MOVE_RESULT_SUPER_EFFECTIVE | MOVE_RESULT_NOT_VERY_EFFECTIVE)))
@@ -1813,7 +1851,7 @@ static void atk0C_datahpupdate(void)
                     }
                     if (!gSpecialStatuses[gActiveBattler].dmg && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                         gSpecialStatuses[gActiveBattler].dmg = gHpDealt;
-                    if (IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
+                    if (IS_MOVE_PHYSICAL(gCurrentMove) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE) && gCurrentMove != MOVE_PAIN_SPLIT)
                     {
                         gProtectStructs[gActiveBattler].physicalDmg = gHpDealt;
                         gSpecialStatuses[gActiveBattler].physicalDmg = gHpDealt;
@@ -1828,7 +1866,7 @@ static void atk0C_datahpupdate(void)
                             gSpecialStatuses[gActiveBattler].physicalBattlerId = gBattlerTarget;
                         }
                     }
-                    else if (!IS_TYPE_PHYSICAL(moveType) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
+                    else if (IS_MOVE_SPECIAL(gCurrentMove) && !(gHitMarker & HITMARKER_PASSIVE_DAMAGE))
                     {
                         gProtectStructs[gActiveBattler].specialDmg = gHpDealt;
                         gSpecialStatuses[gActiveBattler].specialDmg = gHpDealt;
@@ -2117,6 +2155,13 @@ void SetMoveEffect(bool8 primary, u8 certain)
     {
         ++gBattlescriptCurrInstr;
         return;
+    }
+    if (gBattleMons[gBattlerAttacker].ability == ABILITY_SHEER_FORCE
+     && !primary
+     && !(certain == MOVE_EFFECT_CERTAIN))
+    {
+         ++gBattlescriptCurrInstr;
+         return;
     }
     if (gSideStatuses[GET_BATTLER_SIDE(gEffectBattler)] & SIDE_STATUS_SAFEGUARD
      && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD)
@@ -4829,6 +4874,7 @@ static void atk52_switchineffects(void)
     gSpecialStatuses[gActiveBattler].flag40 = 0;
     if (!(gSideStatuses[GetBattlerSide(gActiveBattler)] & SIDE_STATUS_SPIKES_DAMAGED)
      && (gSideStatuses[GetBattlerSide(gActiveBattler)] & SIDE_STATUS_SPIKES)
+     && gBattleMons[gActiveBattler].ability != ABILITY_MAGIC_GUARD
      && !IS_BATTLER_OF_TYPE(gActiveBattler, TYPE_FLYING)
      && gBattleMons[gActiveBattler].ability != ABILITY_LEVITATE)
     {
@@ -6936,6 +6982,7 @@ static void atk96_weatherdamage(void)
              && gBattleMons[gBattlerAttacker].type2 != TYPE_STEEL
              && gBattleMons[gBattlerAttacker].type2 != TYPE_GROUND
              && gBattleMons[gBattlerAttacker].ability != ABILITY_SAND_VEIL
+             && gBattleMons[gBattlerAttacker].ability != ABILITY_MAGIC_GUARD
              && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
              && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
             {
@@ -6951,6 +6998,7 @@ static void atk96_weatherdamage(void)
         if (gBattleWeather & WEATHER_HAIL)
         {
             if (!IS_BATTLER_OF_TYPE(gBattlerAttacker, TYPE_ICE)
+             && gBattleMons[gBattlerAttacker].ability != ABILITY_MAGIC_GUARD
              && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERGROUND)
              && !(gStatuses3[gBattlerAttacker] & STATUS3_UNDERWATER))
             {
@@ -8744,6 +8792,17 @@ static void atkE2_switchoutabilities(void)
     case ABILITY_NATURAL_CURE:
         gBattleMons[gActiveBattler].status1 = 0;
         BtlController_EmitSetMonData(0, REQUEST_STATUS_BATTLE, gBitTable[*(gBattleStruct->battlerPartyIndexes + gActiveBattler)], 4, &gBattleMons[gActiveBattler].status1);
+        MarkBattlerForControllerExec(gActiveBattler);
+        break;
+    case ABILITY_REGENERATOR:
+        gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP / 3;
+        gBattleMoveDamage += gBattleMons[gActiveBattler].hp;
+        if (gBattleMoveDamage > gBattleMons[gActiveBattler].maxHP)
+            gBattleMoveDamage = gBattleMons[gActiveBattler].maxHP;
+        BtlController_EmitSetMonData(BUFFER_A, REQUEST_HP_BATTLE,
+                                    gBitTable[*(gBattleStruct->battlerPartyIndexes + gActiveBattler)],
+                                    sizeof(gBattleMoveDamage),
+                                    &gBattleMoveDamage);
         MarkBattlerForControllerExec(gActiveBattler);
         break;
     }

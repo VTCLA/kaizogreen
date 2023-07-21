@@ -230,6 +230,10 @@ struct BaseStats
             u8 noFlip : 1;
 };
 
+#define MOVE_CATEGORY_PHYSICAL 0
+#define MOVE_CATEGORY_SPECIAL 1
+#define MOVE_CATEGORY_STATUS 2
+
 struct BattleMove
 {
     u8 effect;
@@ -241,6 +245,7 @@ struct BattleMove
     u8 target;
     s8 priority;
     u8 flags;
+    u8 category;
 };
 
 extern const struct BattleMove gBattleMoves[];
@@ -311,7 +316,7 @@ struct Evolution
     u16 targetSpecies;
 };
 
-#define EVOS_PER_MON 5
+#define EVOS_PER_MON 8
 
 extern u8 gPlayerPartyCount;
 extern struct Pokemon gPlayerParty[PARTY_SIZE];
